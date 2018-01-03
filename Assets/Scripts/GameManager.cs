@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour {
 	{
 		controller.anims[controller.activated].SetActive(false);
 		if(controller.activated == 0)
-			controller.activated = controller.anims.Count;
+			controller.activated = controller.anims.Count - 1;
 		else
 			controller.activated -= 1;
 		
