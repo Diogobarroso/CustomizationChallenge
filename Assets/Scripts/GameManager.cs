@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour {
 	public Button rightButtonPrefab;
 	public Button leftButtonPrefab;
 	CharacterController controller; //the controller of the character we're editing
+	public InputField newNameField;
+	
 	void Start ()
 	{
 		GameObject[] characters = GameObject.FindGameObjectsWithTag("Player");
@@ -41,16 +43,11 @@ public class GameManager : MonoBehaviour {
 
 	public void EditName()
 	{
-		/*string newName = "";
-		InputField newNameField = 
-		newNameField.text = "New name";
-		newNameField.transform.position = new Vector3(0,0,0);
-		*/
+		showInput();
 	}
 
 	public void EditAnim()
 	{
-		//TODO: edit the animation of the model
 		Button leftButton = (Button)Instantiate(leftButtonPrefab);
 		Button rightButton = (Button)Instantiate(rightButtonPrefab);
 		leftButton.transform.SetParent(Canvas.transform,false);
@@ -61,7 +58,7 @@ public class GameManager : MonoBehaviour {
 		Debug.Log("AFTER BUTTONS");
 	}
 
-	public void LeftArrow()
+	public void LeftArrow() //select the previous element
 	{
 		controller.anims[controller.activated].SetActive(false);
 		if(controller.activated == 0)
@@ -72,7 +69,7 @@ public class GameManager : MonoBehaviour {
 		controller.anims[controller.activated].SetActive(true);
 	}
 
-	public void RightArrow()
+	public void RightArrow() //select the next element
 	{
 		controller.anims[controller.activated].SetActive(false);
 		if(controller.activated == controller.anims.Count - 1)
@@ -81,5 +78,19 @@ public class GameManager : MonoBehaviour {
 			controller.activated += 1;
 		
 		controller.anims[controller.activated].SetActive(true);
+	}
+
+	public void showInput()
+	{
+		newNameField.gameObject.SetActive(true);
+		newNameField.onEndEdit.AddListener(delegate{changeName(newNameField);});
+	}
+
+	public void changeName(InputField newNameField)
+	{
+		string newName = newNameField.GetComponentInChildren<Text>().text;
+		newNameField.GetComponentInChildren<Text>().text = "";
+		newNameField.gameObject.SetActive(false);
+		controller.changeName(newName);
 	}
 }

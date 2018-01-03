@@ -37,11 +37,6 @@ public class CharacterController : MonoBehaviour {
 		}
 	}
 
-	void changeName(string newName)
-	{
-		name = newName;
-	}
-
 	public void OnMouseDown()
 	{
 		if(SceneManager.GetActiveScene().buildIndex == 0) //if this is the display scene
@@ -74,5 +69,10 @@ public class CharacterController : MonoBehaviour {
 
 		anims[0].SetActive(true);
 		anim = anims[0].GetComponentInChildren<Animation>();
+	}
+
+	public void changeName(string newName)
+	{
+		gameObject.GetComponentInChildren<TextMesh>().text = newName;
 	}
 }
