@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
+	GameObject[] characters; //all characters in the party
 	GameObject currentModel; //The model we're editing
 	public GameObject Canvas;
 	public Button rightButtonPrefab;
@@ -15,7 +16,7 @@ public class GameManager : MonoBehaviour {
 	
 	void Start ()
 	{
-		GameObject[] characters = GameObject.FindGameObjectsWithTag("Player");
+		characters = GameObject.FindGameObjectsWithTag("Player");
 		foreach(GameObject character in characters)
 		{
 			if(character.GetComponent<CharacterController>().getEdit()) //check if this is the model we want to edit
@@ -38,6 +39,8 @@ public class GameManager : MonoBehaviour {
 	public void BackButton()
 	{
 		currentModel.GetComponent<CharacterController>().setEdit(false);
+		foreach(GameObject cha in characters) //not checking which one is the current, easier to enable both, not much processing time lost
+			cha.SetActive(true);
 		SceneManager.LoadScene(0);
 	}
 

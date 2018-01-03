@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class CharacterController : MonoBehaviour {
 
@@ -23,7 +24,11 @@ public class CharacterController : MonoBehaviour {
 
 	void Awake()
 	{
-		DontDestroyOnLoad(transform.gameObject);
+		string tag = gameObject.tag;
+		if(GameObject.FindGameObjectsWithTag(tag).Length == 2) //if there are only 2 objects with my tag (myself and the other party member)
+			DontDestroyOnLoad(gameObject);
+		else
+			Destroy(gameObject);
 	}
 	
 	// Update is called once per frame
@@ -58,7 +63,7 @@ public class CharacterController : MonoBehaviour {
 
 	void LoadAnimations()
 	{
-		for(int i = 0 ; i < animations.Length; i++)
+		/*for(int i = 0 ; i < animations.Length; i++)
 		{
 			anims.Add(Instantiate(Resources.Load(name + "@" + animations[i])) as GameObject);
 			Debug.Log("loaded " + name + " " + animations[i]);
@@ -69,6 +74,14 @@ public class CharacterController : MonoBehaviour {
 
 		anims[0].SetActive(true);
 		anim = anims[0].GetComponentInChildren<Animation>();
+		*/
+		anims = new List<GameObject>(3);
+		foreach(GameObject tmpChar in GameObject.FindGameObjectsWithTag(name))
+		{
+			anims.Add(tmpChar);
+			tmpChar.SetActive(false);
+		}
+		anims[0].SetActive(true);
 	}
 
 	public void changeName(string newName)
