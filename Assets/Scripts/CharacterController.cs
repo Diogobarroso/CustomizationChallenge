@@ -5,19 +5,17 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 
 public class CharacterController : MonoBehaviour {
-
-	// Use this for initialization
-	private string name;
-	private bool edit = false;
-	private Animation anim;
-	private float interval;
-	public float maxInterval = 4f;
-	public int activated = 0;
+	public Vector3 position;
+	public float height = 1;
+	private Vector3 originalScale;
+	public string name;
+	private bool edit = false; //True when this is the character we're going to customize
+	private float interval; //The time that has passed since the last animation
+	public float maxInterval = 4f; //The time between 2 animations (the loop)
 	public List<GameObject> anims; //storing the different animations we have
+	public int activated = 0; //The index of the animation being displayed (from anims)
 	public string[] animations = {"Jumping","Looking Around","Yelling"}; //the animations included in the project
 	void Start () {
-		name = transform.GetComponentInChildren<TextMesh>().text;
-		anim = GetComponentInChildren<Animation>();
 
 		LoadAnimations();
 	}
@@ -25,10 +23,24 @@ public class CharacterController : MonoBehaviour {
 	void Awake()
 	{
 		string tag = gameObject.tag;
-		if(GameObject.FindGameObjectsWithTag(tag).Length == 2) //if there are only 2 objects with my tag (myself and the other party member)
+		if(GameObject.FindGameObjectsWithTag(tag).Length <= 2) //if there are no more 2 objects with my tag (myself and the other party member)
 			DontDestroyOnLoad(gameObject);
 		else
 			Destroy(gameObject);
+
+		if(gameObject.name == "Remy")
+		{
+			position = new Vector3(3,0,0);
+			name = "Remy";
+		}
+		else if (gameObject.name == "Malcolm")
+		{
+			position = new Vector3(-1,0,0);
+			name = "Malcolm";
+		}
+
+		transform.localPosition = position;
+		originalScale = transform.localScale;
 	}
 	
 	// Update is called once per frame
@@ -37,11 +49,13 @@ public class CharacterController : MonoBehaviour {
 
 		if(interval >= maxInterval)
 		{
-			anim.Play();
+			Debug.Log(anims.Count);
+			anims[activated].GetComponent<Animation>().Play();
 			interval = 0;
 		}
 	}
 
+	//When the user taps one of the characters
 	public void OnMouseDown()
 	{
 		if(SceneManager.GetActiveScene().buildIndex == 0) //if this is the display scene
@@ -51,6 +65,7 @@ public class CharacterController : MonoBehaviour {
 		}
 	}
 
+	//Is this the character we're editing?
 	public bool getEdit()
 	{
 		return edit;
@@ -61,31 +76,25 @@ public class CharacterController : MonoBehaviour {
 		edit = state;
 	}
 
-	void LoadAnimations()
+	public void LoadAnimations()
 	{
-		/*for(int i = 0 ; i < animations.Length; i++)
-		{
-			anims.Add(Instantiate(Resources.Load(name + "@" + animations[i])) as GameObject);
-			Debug.Log("loaded " + name + " " + animations[i]);
-			anims[i].transform.SetParent(transform);
-			anims[i].transform.localPosition = new Vector3(0,0,0);
-			anims[i].SetActive(false);
-		}
-
-		anims[0].SetActive(true);
-		anim = anims[0].GetComponentInChildren<Animation>();
-		*/
 		anims = new List<GameObject>(3);
 		foreach(GameObject tmpChar in GameObject.FindGameObjectsWithTag(name))
 		{
 			anims.Add(tmpChar);
-			tmpChar.SetActive(false);
+			tmpChar.SetActive(false); //Disable all the animations
 		}
-		anims[0].SetActive(true);
+		anims[activated].SetActive(true); //We only need one animation at a time
 	}
 
 	public void changeName(string newName)
 	{
 		gameObject.GetComponentInChildren<TextMesh>().text = newName;
+	}
+
+	public void changeHeight(float newHeight)
+	{
+		transform.localScale = newHeight * originalScale;
+		height = newHeight;
 	}
 }

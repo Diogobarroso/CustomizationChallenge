@@ -8,11 +8,18 @@ public class GameManager : MonoBehaviour {
 
 	GameObject[] characters; //all characters in the party
 	GameObject currentModel; //The model we're editing
+	CharacterController controller; //the controller of the currentModel
+
+	//These 3 variables store the characteristics that are passive of change in the Customization, in case the player discards the modifications
+	int previousActivated;
+	string previousName;
+	float previousHeight;
+
 	public GameObject Canvas;
 	public Button rightButtonPrefab;
 	public Button leftButtonPrefab;
-	CharacterController controller; //the controller of the character we're editing
 	public InputField newNameField;
+	public Slider heightSlider;
 	
 	void Start ()
 	{
@@ -28,19 +35,37 @@ public class GameManager : MonoBehaviour {
 				character.SetActive(false);
 		}
 		controller = currentModel.GetComponent<CharacterController>();
-	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-		
+
+		previousActivated = controller.activated;
+		previousName = currentModel.GetComponentInChildren<TextMesh>().text;
+		previousHeight = controller.height;
 	}
 
-	public void BackButton()
+	public void ConfirmButton()
 	{
-		currentModel.GetComponent<CharacterController>().setEdit(false);
-		foreach(GameObject cha in characters) //not checking which one is the current, easier to enable both, not much processing time lost
+		LoadScene();
+	}
+
+	public void CancelButton()
+	{
+		controller.anims[controller.activated].SetActive(false);
+		controller.activated = previousActivated;	
+		controller.anims[controller.activated].SetActive(true);
+		currentModel.GetComponentInChildren<TextMesh>().text = previousName;
+		controller.changeHeight(previousHeight);
+
+		LoadScene();
+	}
+
+	//Prepares to go back to the Display Scene
+	void LoadScene()
+	{
+		controller.setEdit(false);
+		foreach(GameObject cha in characters) //not checking which one is the currentModel, easier to enable both, not much processing time lost
+		{
 			cha.SetActive(true);
+			cha.transform.localPosition = cha.GetComponent<CharacterController>().position;
+		}
 		SceneManager.LoadScene(0);
 	}
 
@@ -49,6 +74,7 @@ public class GameManager : MonoBehaviour {
 		showInput();
 	}
 
+	//Prepares to select the animations
 	public void EditAnim()
 	{
 		Button leftButton = (Button)Instantiate(leftButtonPrefab);
@@ -56,12 +82,12 @@ public class GameManager : MonoBehaviour {
 		leftButton.transform.SetParent(Canvas.transform,false);
 		rightButton.transform.SetParent(Canvas.transform,false);
 
-		leftButton.onClick.AddListener(LeftArrow);
-		rightButton.onClick.AddListener(RightArrow);
-		Debug.Log("AFTER BUTTONS");
+		leftButton.onClick.AddListener(LeftAnim);
+		rightButton.onClick.AddListener(RightAnim);
 	}
 
-	public void LeftArrow() //select the previous element
+	//select the previous animation
+	public void LeftAnim() 
 	{
 		controller.anims[controller.activated].SetActive(false);
 		if(controller.activated == 0)
@@ -71,8 +97,9 @@ public class GameManager : MonoBehaviour {
 		
 		controller.anims[controller.activated].SetActive(true);
 	}
-
-	public void RightArrow() //select the next element
+ 
+ 	//select the next animation
+	public void RightAnim()
 	{
 		controller.anims[controller.activated].SetActive(false);
 		if(controller.activated == controller.anims.Count - 1)
@@ -83,6 +110,7 @@ public class GameManager : MonoBehaviour {
 		controller.anims[controller.activated].SetActive(true);
 	}
 
+	//Shows the InputField in which the User chooses the new name
 	public void showInput()
 	{
 		newNameField.gameObject.SetActive(true);
@@ -95,5 +123,17 @@ public class GameManager : MonoBehaviour {
 		newNameField.GetComponentInChildren<Text>().text = "";
 		newNameField.gameObject.SetActive(false);
 		controller.changeName(newName);
+	}
+
+	//Shows the Height slider
+	public void showHeight()
+	{
+			heightSlider.gameObject.SetActive(!heightSlider.IsActive());
+			heightSlider.value = previousHeight;
+	}
+
+	public void changeHeight(Slider slider)
+	{
+		controller.changeHeight(slider.value);
 	}
 }
